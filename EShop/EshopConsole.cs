@@ -12,11 +12,13 @@ namespace EShop
     {
         private readonly IDepartmentService _departmentService;
         private readonly ISubdepartmentService _subdepartmentService;
+        private readonly IProductService _productService;
 
         public EshopConsole()
         {
             _departmentService = new DepartmentService();
             _subdepartmentService = new SubdepartmentService();
+            _productService = new ProductService();
         }
 
         public bool MainMenu()

@@ -12,10 +12,10 @@ namespace EShop
         public bool AdminMenu()
         {
             Console.Clear();
-            Console.WriteLine("1) Add a new product");
-            Console.WriteLine("2) Edit a product");
+            Console.WriteLine("1) Create product");
+            Console.WriteLine("2) Update product");
             Console.WriteLine("3) Get all products");
-            Console.WriteLine("4) Get a product");
+            Console.WriteLine("4) Get product by id");
             Console.WriteLine("5) Delete a product");
             Console.WriteLine("6) Add Department");
             Console.WriteLine("7) Add Subdepartment");
@@ -28,11 +28,33 @@ namespace EShop
             {
                 case "0":
                     return false;
+                case "1":
+                    Console.Clear();
+                    CreateProduct();
+                    break;
+                case "2":
+                    Console.Clear();
+                    UpdateProduct();
+                    break;
+                case "3":
+                    Console.Clear();
+                    GetProducts();
+                    break;
+                case "4":
+                    Console.Clear();
+                    GetProductById();
+                    break;
+                case "5":
+                    Console.Clear();
+                    DeleteProduct();
+                    break;
                 case "6":
                     Console.Clear();
                     CreateDepartment();
                     break;
                 case "7":
+                    Console.Clear();
+                    CreateSubdepartment();
                     break;
                 default:
                     break;
@@ -41,157 +63,182 @@ namespace EShop
             return true;
         }
 
-        private void AddProduct()
+        private void CreateProduct()
         {
-            /*Console.WriteLine("Please indicate de required values for adding a new product:\n");
-            int id = GetIntInput("Product Id: ");
-            string name = GetStringInput("Name: ");
-            decimal price = GetDecimalInput("Price: ");
-            string description = GetStringInput("Description: ");
-            string brand = GetStringInput("Brand: ");
-            string sku = GetStringInput("SKU: ");
-
-            Subdepartment subdepartment = AskForSubdepartment();
-
             try
             {
-                var product = new Product(id, name, description, price, brand, sku);
+                CreateProductDto product = new();
+                Console.WriteLine("Please enter the required information to add a new product:\n");
 
-                subdepartment.AddProduct(product);
-                product.SetSubdepartment(subdepartment);
+                product.Name = GetStringInput("Name: ");
+                product.Price = GetDecimalInput("Price: ");
+                product.Description = GetStringInput("Description: ");
+                product.Brand = GetStringInput("Brand: ");
+                product.Sku = GetStringInput("SKU: ");
+                product.Stock = GetIntInput("Stock: ");
 
-                _productService.AddProduct(product);
+                Console.WriteLine("\nChoose a Department:");
+                List<DepartmentDto> departments = _departmentService.Get();
 
-                Console.WriteLine("New product added successfully");
+                foreach (var dep in departments)
+                    Console.WriteLine($"Id: {dep.Id}\tName: {dep.Name}");
+
+                int departmentId = GetIntInput("Deparment Id: ");
+                var department = _departmentService.GetById(departmentId);
+
+                if (department is null)
+                    throw new Exception($"Department {departmentId} does not exist");
+
+                Console.WriteLine($"\nChoose a Subdepartment for {department.Name}: ");
+                var subdepartments = _subdepartmentService.GetByDepartmentId(departmentId);
+
+                foreach (var subdep in subdepartments)
+                    Console.WriteLine($"Id: {subdep.Id}\tName: {subdep.Name}");
+
+                product.SubdepartmentId = GetIntInput("Subdepartment Id: ");
+                
+                _productService.CreateProduct(product);
+                Console.WriteLine("Product created");
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-            }*/
-        }
-
-        private void EditProduct()
-        {
-            /*int id = GetIntInput("Project Id (to update):");
-
-            Product origProduct = _productService.GetProduct(id);
-
-            if (origProduct != null)
-            {
-                Console.Write("New Product Name: ");
-                string name = Console.ReadLine();
-                Console.Write("New Product Description: ");
-                string description = Console.ReadLine();
-                Console.Write("New Product Brand: ");
-                string brand = Console.ReadLine();
-                Console.Write("New Product Price: ");
-                string price = Console.ReadLine();
-
-                try
-                {
-                    decimal priceDecimal;
-                    if (string.IsNullOrEmpty(price))
-                        priceDecimal = origProduct.Price;
-                    else
-                        if (!decimal.TryParse(price, out priceDecimal))
-                        throw new FormatException("The value for Price is invalid");
-
-                    if (string.IsNullOrEmpty(name))
-                        name = origProduct.Name;
-
-                    if (string.IsNullOrEmpty(description))
-                        description = origProduct.Description;
-
-                    if (string.IsNullOrEmpty(brand))
-                        brand = origProduct.Brand;
-
-                    _productService.UpdateProduct(new Product(origProduct.Id, name, description, priceDecimal, brand, origProduct.Sku, origProduct.Stock));
-                    Console.WriteLine($"Product {origProduct.Id} was successfully updated");
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                }
             }
-            else
+            finally 
             {
-                Console.WriteLine($"Product {id} doesn't exist");
+                Console.Write("\nPress enter to continue...");
+                Console.ReadLine();
             }
-
-            Console.Write("\nPress any key to continue...");
-            Console.ReadLine();*/
         }
 
-        private void GetAllProducts()
+        private void UpdateProduct()
         {
-            /*List<Product> products = _productService.GetProducts();
+            try
+            {
+                Console.WriteLine("Please enter the required information to update a product\n");
 
-            if (products.Any())
-                products.ForEach(product => Console.WriteLine(product.ToString()));
-            else
-                Console.WriteLine("Products List is Empty");
+                var products = _productService.Get();
 
-            Console.Write("\nPress any key to continue...");
-            Console.ReadLine();*/
+                if (!products.Any())
+                    throw new Exception("There are no products to update");
+
+                foreach (var p in products)
+                    Console.WriteLine($"Id: {p.Id}\n - ({p.Brand}) {p.Name}\n - {p.Description}\n - {p.Price:c}");
+
+                Console.WriteLine();
+                int productId = GetIntInput("Product Id:");
+
+                var product = _productService.GetById(productId);
+
+                if (product is null)
+                    throw new Exception($"Product {productId} does not exist");
+
+                decimal price = product.Price;
+
+                Console.Write("Name: ");
+                string inputName = Console.ReadLine().Trim();
+                Console.Write("Description: ");
+                string inputDescription = Console.ReadLine().Trim();
+                Console.Write("Brand: ");
+                string inputBrand = Console.ReadLine().Trim();
+                Console.Write("Price: ");
+                string inputPrice = Console.ReadLine().Trim();
+
+                if (!string.IsNullOrEmpty(inputPrice))
+                    if (!decimal.TryParse(inputPrice, out price))
+                        throw new FormatException("The value for Price must be decimal");
+
+                Console.Write("Sku: ");
+                string inputSku = Console.ReadLine().Trim();
+
+
+                _productService.UpdateProduct(new UpdateProductDto 
+                { 
+                    Id = productId,
+                    Name = inputName,
+                    Description = inputDescription,
+                    Brand = inputBrand,
+                    Price = price,
+                    Sku = inputSku
+                });
+                Console.WriteLine("Product updated");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally 
+            {
+                Console.Write("\nPress enter to continue...");
+                Console.ReadLine();
+            }
         }
 
-        private void GetProduct()
+        private void GetProducts()
         {
-            /*int id = GetIntInput("Product Id: ");
-            Product product = _productService.GetProduct(id);
+            try
+            {
+                var products = _productService.Get();
 
-            if (product != null)
-                Console.WriteLine(product.ToString());
-            else
-                Console.WriteLine($"Product {id} Was Not Found");
+                if (!products.Any())
+                    throw new Exception("There are no products");
 
-            Console.Write("\nPress any key to continue...");
-            Console.ReadLine();*/
+                products
+                    .ForEach(product => Console.WriteLine($"Id: {product.Id}\n - ({product.Brand}) {product.Name}\n - {product.Description}\n - {product.Price:c}"));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                Console.Write("\nPress enter to continue...");
+                Console.ReadLine();
+            }
+        }
+
+        private void GetProductById()
+        {
+            try
+            {
+                int id = GetIntInput("Product Id: ");
+                var product = _productService.GetById(id);
+
+                if (product is null)
+                    throw new Exception($"Product {id} does not exist");
+
+                Console.WriteLine($"\nId: {product.Id}\n - ({product.Brand}) {product.Name}\n - {product.Description}\n - {product.Price:c}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally 
+            {
+                Console.Write("\nPress enter to continue...");
+                Console.ReadLine();
+            }
         }
 
         private void DeleteProduct()
         {
-            /*int id = GetIntInput("Product Id (to delete): ");
-
             try
             {
-                _productService.DeleteProduct(id);
-                Console.WriteLine($"Product {id} deleted successfully");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
+                Console.WriteLine("Please enter the following information to delete a product\n");
+                int productId = GetIntInput("Product Id: ");
 
-            Console.Write("\nPress any key to continue...");
-            Console.ReadLine();*/
+                _productService.DeleteProduct(productId);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                Console.Write("\nPress enter to continue...");
+                Console.ReadLine();
+            }
         }
-
-        /*private Subdepartment AskForSubdepartment()
-        {
-            Console.WriteLine("Choose a Department:");
-            List<Department> departmentsList = _departmentService.GetDepartments();
-
-            for (int i = 0; i < departmentsList.Count; i++)
-            {
-                Console.WriteLine($"{i + 1}) {departmentsList.ElementAt(i).Name}");
-            }
-
-            int selectedDepartment = GetIntInput("Deparment: ");
-            Department department = departmentsList.ElementAt(selectedDepartment - 1);
-
-            Console.WriteLine($"Choose a Subdepartment for {department.Name}: ");
-            for (int i = 0; i < department.Subdepartments.Count; i++)
-            {
-                Console.WriteLine($"{i + 1}) {department.Subdepartments.ElementAt(i).Name}");
-            }
-
-            int selectedSubdepartment = GetIntInput("Subdepartment: ");
-            Subdepartment subdepartment = department.Subdepartments.ElementAt(selectedSubdepartment - 1);
-
-            subdepartment.Department = department;
-            return subdepartment;
-        }*/
 
         private void CreateDepartment() 
         {
@@ -201,13 +248,47 @@ namespace EShop
                 Console.WriteLine("Please enter the required information to add a new department\n");
                 department.Name = GetStringInput("Name: ");
                 _departmentService.Create(department);
-
+                Console.WriteLine("Department created");
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
             finally 
+            {
+                Console.Write("\nPress enter to continue...");
+                Console.ReadLine();
+            }
+        }
+
+        private void CreateSubdepartment()
+        {
+            try
+            {
+                var departments = _departmentService.Get();
+
+                if (!departments.Any())
+                    throw new Exception("There are no departments, create one in order to create a subdeparment");
+
+                CreateSubdepartmentDto subdepartment = new();
+                Console.WriteLine("Please enter the required information to add a new subdepartment\n");
+                Console.WriteLine("Current Departments");
+
+                foreach (var department in departments)
+                    Console.WriteLine($"Id: {department.Id}\tName: {department.Name}");
+
+                Console.WriteLine();
+                subdepartment.Name = GetStringInput("Name: ");
+                subdepartment.DepartmentId = GetIntInput("Department Id: ");
+
+                _subdepartmentService.Create(subdepartment);
+                Console.WriteLine("Subdepartment created");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally
             {
                 Console.Write("\nPress enter to continue...");
                 Console.ReadLine();
