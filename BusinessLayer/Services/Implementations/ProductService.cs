@@ -14,7 +14,7 @@ namespace BusinessLayer.Services.Implementations
     {
         private readonly EshopContext _context = new();
 
-        public void AddProduct(CreateProductDto dto)
+        public void CreateProduct(CreateProductDto dto)
         {
             try
             {
@@ -43,24 +43,95 @@ namespace BusinessLayer.Services.Implementations
             }
         }
 
+        public List<ProductDto> Get()
+        {
+            try
+            {
+                return _context.Products
+                    .Select(p => new ProductDto 
+                    { 
+                        Id = p.Id,
+                        Name = p.Name,
+                        Stock = p.Stock,
+                        Price = p.Price,
+                        Sku = p.Sku,
+                        Description = p.Description,
+                        Brand = p.Brand,
+                        SubdepartmentId= p.SubdepartmentId
+                    })
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public ProductDto? GetById(int id)
+        {
+            try
+            {
+                return _context.Products
+                    .Where(p => p.Id.Equals(id))
+                    .Select(p => new ProductDto
+                    {
+                        Id = p.Id,
+                        Name = p.Name,
+                        Stock = p.Stock,
+                        Price = p.Price,
+                        Sku = p.Sku,
+                        Description = p.Description,
+                        Brand = p.Brand,
+                        SubdepartmentId = p.SubdepartmentId
+                    })
+                    .FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public void UpdateProduct(UpdateProductDto dto)
+        {
+            try
+            {
+                var product = _context.Products.FirstOrDefault(p => p.Id.Equals(dto.Id));
+
+                if (product is null)
+                    throw new Exception($"Product {dto.Id} doest not exist");
+
+                product.Name = String.IsNullOrEmpty(dto.Name) ? product.Name : dto.Name;
+                product.Price = dto.Price;
+                product.Sku = String.IsNullOrEmpty(dto.Sku) ? product.Sku: dto.Sku;
+                product.Description = String.IsNullOrEmpty(dto.Description) ? product.Description: dto.Description;
+                product.Brand = String.IsNullOrEmpty(dto.Brand) ? product.Brand: dto.Brand;
+
+                _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
         public void DeleteProduct(int id)
         {
-            throw new NotImplementedException();
-        }
+            try
+            {
+                var product = _context.Products
+                    .FirstOrDefault(p => p.Id.Equals(id));
 
-        public Product GetProduct(int id)
-        {
-            throw new NotImplementedException();
-        }
+                if (product is null)
+                    throw new Exception($"Product {id} does not exist");
 
-        public List<Product> GetProducts()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void UpdateProduct(Product product)
-        {
-            throw new NotImplementedException();
+                _context.Products.Remove(product);
+                _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
     }
 }
