@@ -10,5 +10,7 @@ namespace BusinessLayer.Services.Abstractions
     public interface IDepartmentService
     {
         void Create(CreateDepartmentDto dto);
+        List<DepartmentDto> Get();
+        DepartmentDto? GetById(int id);
     }
 }

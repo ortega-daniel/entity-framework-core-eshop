@@ -20,7 +20,35 @@ namespace BusinessLayer.Services.Implementations
             {
                 _context.Departments.Add(new Department { Name = dto.Name });
                 _context.SaveChanges();
-                Console.WriteLine("Department added");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public List<DepartmentDto> Get() 
+        {
+            try
+            {
+                return _context.Departments
+                    .Select(d => new DepartmentDto { Id = d.Id, Name = d.Name })
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public DepartmentDto? GetById(int id) 
+        {
+            try
+            {
+                return _context.Departments
+                    .Where(d => d.Id.Equals(id))
+                    .Select(d => new DepartmentDto { Id = d.Id, Name = d.Name })
+                    .FirstOrDefault();
             }
             catch (Exception ex)
             {
