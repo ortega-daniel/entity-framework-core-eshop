@@ -56,6 +56,8 @@ namespace EShop
                     Console.Clear();
                     CreateSubdepartment();
                     break;
+                case "8":
+                    break;
                 case "9":
                     bool showPurchaseOrderMenu = true;
                     while (showPurchaseOrderMenu)

@@ -46,11 +46,11 @@ namespace EShop
                     }
                     break;
                 case "2":
-                    /*bool showClientMenu = true;
-                    while (showClientMenu)
+                    bool showCustomerMenu = true;
+                    while (showCustomerMenu)
                     {
-                        showClientMenu = ClientMenu();
-                    }*/
+                        showCustomerMenu = CustomerMenu();
+                    }
                     break;
                 default:
                     break;
