@@ -19,7 +19,7 @@ namespace DataInterface
         public DbSet<CartDetail> CartDetails { get; set; }
         public DbSet<OrderHeader> OrderHeaders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
-        public DbSet<Provider> Provider { get; set; }
+        public DbSet<Provider> Providers { get; set; }
         public DbSet<PurchaseOrderHeader> PurchaseOrderHeaders { get; set; }
         public DbSet<PurchaseOrderDetail> PurchaseOrderDetails { get; set; }
 
